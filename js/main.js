@@ -9,6 +9,11 @@ var draww = false;
 var win_ln =0; //number of wining line
 var b_sqr = document.getElementsByClassName("b_pole"); //array of html table elements
 
+
+//color constants for animation and styling
+var std_bdCol = "white";
+var play_bdCol = "black";
+
 //constants
 //array of wining lines					
 const l_match=	[ 	[	 [ 0,0 ], [ 0,1 ], [ 0,2 ] 	], // górna pozioma
@@ -99,8 +104,9 @@ function draw(){
 				i++;
 				continue;
 			}	
-			else
+			else{
 				b_sqr[i].innerHTML = board[y][x];
+			}
 			i++;
 		}
 	}
@@ -203,8 +209,7 @@ function start(){
 function stop(){
 	//stops game
 	if(g_gamestate == 0)
-		return false;
-	
+		return false;	
 	g_gamestate = 0;
 	b_init();
 	draw();
