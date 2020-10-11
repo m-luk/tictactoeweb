@@ -30,6 +30,19 @@ color3 = "red";
 
 cls_b_pole = document.getElementsByClassName("b_pole");
 
+for (var i = 0; i < cls_b_pole.length; i++) {
+    cls_b_pole[i].addEventListener("click", function(){
+        if (g_gamestate != 1){
+            return
+        }
+        else {
+            this.innerHTML = act_player
+        }
+    });
+
+}
+
+
 //buttons
 //start
 document.getElementById("bt_start").addEventListener("click", function(){
