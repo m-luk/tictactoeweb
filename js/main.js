@@ -4,55 +4,56 @@ var board = [[0, 0, 0], //board cache
                     [0, 0, 0]];
 
 var act_player = 0;
-var g_gamestate = 0;
+var gamestate = 0;
 var draww = false;
 var win_ln =0; //number of wining line
-var b_sqr = document.getElementsByClassName("b_pole"); //array of html table elements
+const BOARD_FIELDS= document.getElementsByClassName("b_pole"); //array of html table elements
+
+const MSG = document.getElementById("msgbox");
 
 
 //color constants for animation and styling
-var std_bdCol = "white";
-var play_bdCol = "black";
+const std_bdCol = "white";
+const play_bdCol = "black";
 
 //constants
 //array of wining lines					
-const l_match=	[ 	[	 [ 0,0 ], [ 0,1 ], [ 0,2 ] 	], // górna pozioma
-                            [	 [ 1,0 ], [ 1,1 ], [ 1,2 ] 	], // środ. pozioma
-                            [	 [ 2,0 ], [ 2,1 ], [ 2,2 ] 	], // dolna pozioma
-                            [	 [ 0,0 ], [ 1,0 ], [ 2,0 ] 	], // lewa pionowa
-                            [	 [ 0,1 ], [ 1,1 ], [ 2,1 ] 	], // środ. pionowa
-                            [	 [ 0,2 ], [ 1,2 ], [ 2,2 ] 	], // prawa pionowa
-                            [	 [ 0,0 ], [ 1,1 ], [ 2,2 ] 	], // p. backslashowa
-                            [	 [ 2,0 ], [ 1,1 ], [ 0,2 ] 	] ]; // p. slashowa
+const win_lines=	[ 	[ 0, 1, 2 ], // górna pozioma
+                        [ 3, 4, 5 ], // środ. pozioma
+                        [ 6, 7, 8 ], // dolna pozioma
+                        [ 0, 3, 6 ], // lewa pionowa
+                        [ 1 ,4 ,7 ], // środ. pionowa
+                        [ 2, 5, 8 ], // prawa pionowa
+                        [ 0, 4, 8 ], // p. backslashowa
+                        [ 6, 4, 2 ] ]; // p. slashowa
+
+
 //player signs
-const p_1 = 'X'; 
-const p_2 = 'O';
+const PLAYER_1 = 'X'; 
+const PLAYER_2 = 'O';
+const EMPTY_FIELD = ""
 
 //functions
 
-function b_init(){
-    //initialises board to blank state
-    var x, y;
-    for(y=0; y<3; y++){
-        for(x=0; x<3; x++){
-            board[y][x] = 0;
-        }
-    }
-    //initialisation of square colors
-    for(var i=0; i<9; i++){
-        b_sqr[i].style.backgroundColor = "white";
+function boardInit(){
+    for (let field in BOARD_FIELDS) {
+        field.innerHTML = EMPTY_FIELD;
+        field.style.backgroundColor = "white";
     }
 }
 
-function v_init(){
+
+function init(){
     //initialises variables
     act_player = 0;
-    g_gamestate = 0;
+    gamestate = 0;
     win_ln =0;
     draww = false;
+
+    boardInit();
 }
 
-function c_ifWin(){
+function checkIfWon(){
     //checks if any of wining lines appeard
     var p_match;
     var i, j;
@@ -61,7 +62,7 @@ function c_ifWin(){
         p_match = 0;
         
         for(j=0; j<3; ++j){
-            if(board[l_match[i][j][0]][l_match[i][j][1]] == act_player)
+            if(board[win_lines[i][j][0]][l_match[i][j][1]] == act_player)
                 p_match++;	
         }
         //if full
@@ -74,20 +75,20 @@ function c_ifWin(){
 
 function p_win(){
     //turns wining squares to red
-    document.getElementById("msgbox").innerHTML = act_player + " won!";
-    var y;
-    var x;
-    var i;
+    setMsg(act_player + " won!");
+    let y;
+    let x;
+    let i;
     
     //mapping wining line
     for(i=0; i<3; i++){
-        y = l_match[win_ln][i][0];
-        x = l_match[win_ln][i][1];
+        y = win_lines[win_ln][i][0];
+        x = win_lines[win_ln][i][1];
         
         var pole = x + 3*y;
         
         //turn to red
-        b_sqr[pole].style.backgroundColor = "red";
+        BOARD_FIELDS[pole].style.backgroundColor = "red";
     }
 }
 
@@ -100,24 +101,25 @@ function draw(){
     for(y=0; y<3; y++){
         for(x=0; x<3; x++){
             if(board[y][x]==0){
-                b_sqr[i].innerHTML = "";
+                BOARD_FIELDS[i].innerHTML = "";
                 i++;
                 continue;
             }	
             else{
-                b_sqr[i].innerHTML = board[y][x];
+                BOARD_FIELDS[i].innerHTML = board[y][x];
             }
             i++;
         }
     }
 }
 
-function cl_msg(){
-    //clears msgbox
-    document.getElementById("msgbox").innerHTML = "";
+
+function setMsg(message = "") {
+    // ommit argument to clear the message value
+    MSG.innerHTML = message
 }
 
-function c_ifFull(){
+function checkIfDraw(){
     //checks if board is fully loaded
     var y;
     var x;
@@ -135,79 +137,71 @@ function c_ifFull(){
 }
 
 
-function p_disp(){
+function playerDisplay(){
     //displays act_player to msgbox
-    var txt = "Player " + act_player;
-    document.getElementById("msgbox").innerHTML = txt;
+    setMsg("Player " + act_player);
 }
 
-function placeSgn(x, y){
-    //msgbox import
-    var msg = document.getElementById("msgbox");
-    //if not started
-    if((g_gamestate==0) || draww){
+
+function placeSign(object){
+    if((gamestate==0) || draww){
         return;
     }
-    
-    //if target is taken
-    if(board[y][x] != 0){
-        msg.innerHTML = "This square is aleardy taken";
-        return false;	
+    else if ( object.innerHTML != ""){
+        setMsg("This box is already taken!")
+        return false;
     }
-    //if target is availible
     else {
-        board[y][x] = act_player;
-        draw();
-        //check if wining line appeared
-        if(c_ifWin()){
-            p_win();
+        // TODO: we need to gather board state from DOM not keep it inside
+        // TODO:
+
+        // place player on board
+        object.innerHTML = act_player;
+
+        // calculate board form objects
+
+        // player won
+        if (checkIfWon()){
+            playerWin();
             return;
         }
-        //check if board is full
-        else if(c_ifFull()){
-            msg.innerHTML = "Draw!";
-            draww =true;
+        // draw
+        else if (checkIfDraw()){
+            setMsg("Draw!");
+            draww = true;
             return;
         }
-        //player change
-        else{
-            if(act_player == p_1)
-                act_player = p_2;
-            else
-                act_player = p_1;
-        }
+        // active player change
+        else { (act_player == PLAYER_1 ? act_player = PLAYER_2 : act_player = PLAYER_1)}
     }
-    //display new player
-    p_disp();
+
 }
 
 
 function start(){
     //check if aleardy started, random choose player and switch to started
     //if started
-    if(g_gamestate!=0){
+    if(gamestate!=0){
         return false
     }
     //board initialisation
-    b_init();
-    //variables initialisation
-    v_init();
+    init();
     //player choosing
-    (Math.floor((Math.random() * 10) + 1)%2==0) ? act_player = p_1 : act_player = p_2;
+    (Math.floor((Math.random() * 10) + 1)%2==0) ? act_player = PLAYER_1 : act_player = PLAYER_2;
 
-    g_gamestate = 1;
+    gamestate = 1;
     
-    document.getElementById("msgbox").innerHTML = "Player with sign " + act_player + " starts!";
+    setMsg("Player with sign " + act_player + " starts!");
     draw();
 }
 
 function stop(){
     //stops game
-    if(g_gamestate == 0)
+    if(gamestate == 0)
         return false;	
-    g_gamestate = 0;
-    b_init();
+    gamestate = 0;
+    boardInit();
     draw();
-    cl_msg();
+    setMsg();
 }
 
