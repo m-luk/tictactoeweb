@@ -3,40 +3,30 @@ var board = [[0, 0, 0], //board cache
                     [0, 0, 0],
                     [0, 0, 0]];
 
-var act_player = 0;
-var gamestate = 0;
-var draww = false;
-var win_ln =0; //number of wining line
-const BOARD_FIELDS= document.getElementsByClassName("b_pole"); //array of html table elements
-
-const MSG = document.getElementById("msgbox");
-
+let act_player = 0;
+let gamestate = 0;
+let draww = false;
+let win_ln =0; //number of wining line
 
 //color constants for animation and styling
 const std_bdCol = "white";
 const play_bdCol = "black";
 
-//constants
-//array of wining lines					
-const win_lines=	[ 	[ 0, 1, 2 ], // górna pozioma
-                        [ 3, 4, 5 ], // środ. pozioma
-                        [ 6, 7, 8 ], // dolna pozioma
-                        [ 0, 3, 6 ], // lewa pionowa
-                        [ 1 ,4 ,7 ], // środ. pionowa
-                        [ 2, 5, 8 ], // prawa pionowa
-                        [ 0, 4, 8 ], // p. backslashowa
-                        [ 6, 4, 2 ] ]; // p. slashowa
-
-
-//player signs
-const PLAYER_1 = 'X'; 
-const PLAYER_2 = 'O';
-const EMPTY_FIELD = ""
-
 //functions
+function getBoard(){
+
+    let values = [];
+
+    for (field of BOARD_FIELDS) {
+        values.push(field.innerHTML);
+    }
+
+    return values;
+}
+
 
 function boardInit(){
-    for (let field in BOARD_FIELDS) {
+    for (field of BOARD_FIELDS) {
         field.innerHTML = EMPTY_FIELD;
         field.style.backgroundColor = "white";
     }
@@ -51,89 +41,39 @@ function init(){
     draww = false;
 
     boardInit();
+    document.getElementById("bt_start").innerHTML = "START";
 }
 
-function checkIfWon(){
+
+function getPlayerFields(player){
+    return getAllIndexes( getBoard(), player);
+}
+
+
+function checkIfWon(player){
     //checks if any of wining lines appeard
-    var p_match;
-    var i, j;
+
+    let final_line = null;
+
+    WIN_LINES.forEach(element => {
+        if (checkIfSubset(element, getPlayerFields(player))) { 
+            console.log(`Player ${player} won!`)
+            final_line = element;
+        }
+    });
     
-    for(i=0; i<8; ++i){
-        p_match = 0;
-        
-        for(j=0; j<3; ++j){
-            if(board[win_lines[i][j][0]][l_match[i][j][1]] == act_player)
-                p_match++;	
-        }
-        //if full
-        if(p_match == 3){
-            win_ln = i;
-            return true;
-        }
-    }
+    return final_line;
 }
 
-function p_win(){
-    //turns wining squares to red
-    setMsg(act_player + " won!");
-    let y;
-    let x;
-    let i;
-    
-    //mapping wining line
-    for(i=0; i<3; i++){
-        y = win_lines[win_ln][i][0];
-        x = win_lines[win_ln][i][1];
-        
-        var pole = x + 3*y;
-        
-        //turn to red
-        BOARD_FIELDS[pole].style.backgroundColor = "red";
-    }
-}
 
-function draw(){
-    //draws board to the screen
-    //DOM 
-    var x, y;
-    var i=0;
-    //filing board
-    for(y=0; y<3; y++){
-        for(x=0; x<3; x++){
-            if(board[y][x]==0){
-                BOARD_FIELDS[i].innerHTML = "";
-                i++;
-                continue;
-            }	
-            else{
-                BOARD_FIELDS[i].innerHTML = board[y][x];
-            }
-            i++;
-        }
-    }
+function checkIfDraw() {
+    return (getBoard().indexOf("") == -1);
 }
 
 
 function setMsg(message = "") {
     // ommit argument to clear the message value
     MSG.innerHTML = message
-}
-
-function checkIfDraw(){
-    //checks if board is fully loaded
-    var y;
-    var x;
-    var l =0;
-    for(y=0; y<3; y++){
-        for(x=0; x<3; x++){
-            if(board[y][x]==0)
-                l++;
-        }
-    }
-    if(l==0){
-        return true;
-    }
-    return false;
 }
 
 
@@ -143,11 +83,11 @@ function playerDisplay(){
 }
 
 
-function placeSign(object){
-    if((gamestate==0) || draww){
+function placeSign(field){
+    if (gamestate==0 || gamestate=="draw" || gamestate=="won"){
         return;
     }
-    else if ( object.innerHTML != ""){
+    else if ( field.innerHTML != ""){
         setMsg("This box is already taken!")
         return false;
     }
@@ -156,23 +96,29 @@ function placeSign(object){
         // TODO:
 
         // place player on board
-        object.innerHTML = act_player;
+        field.innerHTML = act_player;
 
         // calculate board form objects
 
         // player won
-        if (checkIfWon()){
-            playerWin();
+        let won = checkIfWon(act_player);
+        if(won){
+            showWinner(act_player, won);
+            gamestate = "won";
             return;
         }
         // draw
         else if (checkIfDraw()){
             setMsg("Draw!");
-            draww = true;
+            gamestate = "draw";
             return;
         }
         // active player change
-        else { (act_player == PLAYER_1 ? act_player = PLAYER_2 : act_player = PLAYER_1)}
+        else { 
+            (act_player == PLAYER_1) ? act_player = PLAYER_2 : act_player = PLAYER_1;
+            playerDisplay();
+        }
+        
     }
 
 }
@@ -181,7 +127,7 @@ function placeSign(object){
 function start(){
     //check if aleardy started, random choose player and switch to started
     //if started
-    if(gamestate!=0){
+    if(gamestate == 1){
         return false
     }
     //board initialisation
@@ -192,7 +138,6 @@ function start(){
     gamestate = 1;
     
     setMsg("Player with sign " + act_player + " starts!");
-    draw();
 }
 
 function stop(){
@@ -201,7 +146,6 @@ function stop(){
         return false;	
     gamestate = 0;
     boardInit();
-    draw();
     setMsg();
 }
 

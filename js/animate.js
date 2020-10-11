@@ -1,7 +1,4 @@
-//js script providing animations for the game   
-
-
-function ch_color(target, color){
+function changeColor(target, color){
    //change color of one object or collection of objects
    //determine if target is an Array
     toClass = {}.toString;
@@ -18,7 +15,7 @@ function ch_color(target, color){
     }
 }
 
-function ch_bgColor(target, backgroundColor){
+function changeBackgroundColor(target, backgroundColor){
    //change background color of one object or collection of objects
    //determine if target is an Array
    toClass = {}.toString;
@@ -35,7 +32,7 @@ function ch_bgColor(target, backgroundColor){
     }
 }
 
-function ch_bdColor(target, borderColor){
+function changeBorderColor(target, borderColor){
     //change border color of one object or collection of objects
     //determine if target is an Array
     toClass = {}.toString;
@@ -53,7 +50,7 @@ function ch_bdColor(target, borderColor){
 
 }
 
-function ch_dimension(target, width = false, height = false){
+function changeDimension(target, width = false, height = false){
     //change dimensions of target or collection of targets
     //if dimension is given 
     toClass = {}.toString;
@@ -70,4 +67,15 @@ function ch_dimension(target, width = false, height = false){
     else{
         console.log("Error: ch_bdColor : target invalid");
     }
+}
+
+function showWinner(player, final_line){
+    //turns wining squares to red
+    setMsg(player + " won!");
+    
+    final_line.forEach(element => {
+        BOARD_FIELDS[element].style.backgroundColor = "red";
+    });
+
+    document.getElementById("bt_start").innerHTML = "RESTART";
 }

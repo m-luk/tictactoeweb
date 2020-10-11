@@ -27,21 +27,24 @@ color3 = "red";
 */
 
 
-
-
-
+// field click listener
+for (let i = 0; i<BOARD_FIELDS.length; i++){
+    BOARD_FIELDS[i].addEventListener("click", function () {
+        placeSign(this)
+    });
+}
 
 
 //buttons
 //start
 document.getElementById("bt_start").addEventListener("click", function(){
     start();
-    ch_bdColor(cls_b_pole, color2);
-    ch_dimension(cls_b_pole, "50px", "50px");
+    changeBorderColor(BOARD_FIELDS, color2);
+    changeDimension(BOARD_FIELDS, "50px", "50px");
 })
 //stop
 document.getElementById("bt_stop").addEventListener("click", function(){
     stop();
-    ch_bdColor(cls_b_pole, color1);
-    ch_dimension(cls_b_pole, "15px", "15px");
+    changeBorderColor(BOARD_FIELDS, color1);
+    changeDimension(BOARD_FIELDS, "15px", "15px");
 })
